@@ -1,0 +1,30 @@
+{
+  "name": "webshit",
+  "version": "0.0.0",
+  "scripts": {
+    "start": "vite",
+    "dev": "vite",
+    "build": "vite build",
+    "serve": "vite preview",
+    "lint": "eslint --ext .js,.vue src",
+    "i18n:extract": "npx i18next-parser 'src/**/*.vue' -c i18next-parser.config.js",
+    "i18n:convert2gettext": "i18next-conv -l en -s locales/en/translation.json -t locales/en/translation.po"
+  },
+  "dependencies": {
+    "i18next": "^20.4.0",
+    "i18next-conv": "^10.2.0",
+    "vue": "^3.2.4"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^1.3.0",
+    "@vue/compiler-sfc": "^3.0.5",
+    "eslint": "^7.32.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.24.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.1.0",
+    "eslint-plugin-vue": "^7.16.0",
+    "i18next-parser": "^4.4.0",
+    "vite": "^2.4.4"
+  }
+}
