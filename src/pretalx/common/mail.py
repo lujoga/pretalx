@@ -52,6 +52,7 @@ def mail_send_task(
     cc: list = None,
     bcc: list = None,
     headers: dict = None,
+    attach_ical: bool = False,
 ):
     if isinstance(to, str):
         to = [to]
@@ -62,6 +63,7 @@ def mail_send_task(
         [] if not reply_to or (len(reply_to) == 1 and reply_to[0] == "") else reply_to
     )
     reply_to = reply_to.split(",") if isinstance(reply_to, str) else reply_to
+    ical_attachments = None
     if event:
         event = Event.objects.get(pk=event)
         backend = event.get_mail_backend()
@@ -78,6 +80,20 @@ def mail_send_task(
             reply_to = [formataddr((str(event.name), reply_to))]
 
         sender = formataddr((str(event.name), sender or settings.MAIL_FROM))
+
+        if attach_ical:
+            slots = event.current_schedule.talks.filter(
+                start__isnull=False,
+                room__isnull=False,
+                submission__speakers__email__in=to,
+            ).select_related(
+                "submission"
+            )  # This only works because we never send one email to multiple speakers
+            if slots:
+                ical_attachments = [
+                    (f"{slot.frab_slug}.ics", slot.full_ical()) for slot in slots
+                ]
+
     else:
         sender = formataddr(("pretalx", settings.MAIL_FROM))
         backend = get_connection(fail_silently=False)
@@ -96,6 +112,9 @@ def mail_send_task(
         from inlinestyler.utils import inline_css
 
         email.attach_alternative(inline_css(html), "text/html")
+    if ical_attachments:
+        for name, cal in ical_attachments:
+            email.attach(name, cal.serialize(), "text/calendar")
 
     try:
         backend.send_messages([email])

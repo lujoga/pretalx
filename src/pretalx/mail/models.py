@@ -76,6 +76,7 @@ class MailTemplate(LogMixin, models.Model):
         commit: bool = True,
         submission=None,
         full_submission_content: bool = False,
+        attach_ical: bool = False,
     ):
         """Creates a :class:`~pretalx.mail.models.QueuedMail` object from a
         MailTemplate.
@@ -136,6 +137,7 @@ class MailTemplate(LogMixin, models.Model):
                 bcc=self.bcc,
                 subject=subject,
                 text=text,
+                attach_ical=attach_ical,
             )
             if skip_queue:
                 mail.send()
@@ -203,6 +205,7 @@ class QueuedMail(LogMixin, models.Model):
     subject = models.CharField(max_length=200, verbose_name=_("Subject"))
     text = models.TextField(verbose_name=_("Text"))
     sent = models.DateTimeField(null=True, blank=True, verbose_name=_("Sent at"))
+    attach_ical = models.BooleanField(default=False)
 
     objects = ScopedManager(event="event")
 
@@ -280,6 +283,7 @@ class QueuedMail(LogMixin, models.Model):
                 "event": self.event.pk if has_event else None,
                 "cc": (self.cc or "").split(","),
                 "bcc": (self.bcc or "").split(","),
+                "attach_ical": self.attach_ical,
             }
         )
 
